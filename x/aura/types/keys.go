@@ -22,6 +22,11 @@ const (
 	AttributeKeyAck = "acknowledgement"
 )
 
+// Events
+const (
+	EventAlliance = "alliance"
+)
+
 var (
 	FeeICAKey = []byte{0x01}
 )

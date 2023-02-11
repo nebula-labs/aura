@@ -494,6 +494,7 @@ func New(
 		app.ICAControllerKeeper,
 		app.TransferKeeper,
 		*app.IBCKeeper,
+		app.AccountKeeper,
 	)
 
 	auraModule := auramodule.NewAppModule(appCodec, app.AuraKeeper)
