@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
 	"github.com/tendermint/tendermint/libs/log"
@@ -9,14 +10,22 @@ import (
 	"github.com/aura-nw/aura/x/aura/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	capabilitykeeper "github.com/cosmos/cosmos-sdk/x/capability/keeper"
+	icacontrollerkeeper "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/controller/keeper"
+	ibctransferkeeper "github.com/cosmos/ibc-go/v3/modules/apps/transfer/keeper"
+	ibckeeper "github.com/cosmos/ibc-go/v3/modules/core/keeper"
 )
 
 type (
 	Keeper struct {
-		cdc        codec.BinaryCodec
-		storeKey   sdk.StoreKey
-		memKey     sdk.StoreKey
-		paramSpace paramtypes.Subspace
+		cdc                 codec.BinaryCodec
+		storeKey            sdk.StoreKey
+		memKey              sdk.StoreKey
+		paramSpace          paramtypes.Subspace
+		scopedKeeper        capabilitykeeper.ScopedKeeper
+		IbcKeeper           ibckeeper.Keeper
+		IcaControllerKeeper icacontrollerkeeper.Keeper
+		transferKeeper      ibctransferkeeper.Keeper
 	}
 )
 
@@ -25,17 +34,24 @@ func NewKeeper(
 	storeKey,
 	memKey sdk.StoreKey,
 	paramSpace paramtypes.Subspace,
-
+	scopedKeeper capabilitykeeper.ScopedKeeper,
+	icaControllerKeeper icacontrollerkeeper.Keeper,
+	transferKeeper ibctransferkeeper.Keeper,
+	ibcKeeper ibckeeper.Keeper,
 ) Keeper {
 	// set KeyTable if it has not already been set
 	if !paramSpace.HasKeyTable() {
 		paramSpace = paramSpace.WithKeyTable(types.ParamKeyTable())
 	}
 	return Keeper{
-		cdc:        cdc,
-		storeKey:   storeKey,
-		memKey:     memKey,
-		paramSpace: paramSpace,
+		cdc:                 cdc,
+		storeKey:            storeKey,
+		memKey:              memKey,
+		paramSpace:          paramSpace,
+		scopedKeeper:        scopedKeeper,
+		IcaControllerKeeper: icaControllerKeeper,
+		IbcKeeper:           ibcKeeper,
+		transferKeeper:      transferKeeper,
 	}
 }
 
