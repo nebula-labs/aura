@@ -31,7 +31,7 @@ func GetTxCmd() *cobra.Command {
 // NewSendTxCmd returns a CLI command handler for creating a MsgSend transaction.
 func NewSendTxCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "alliance-send [amount]",
+		Use: "alliance-send [host amount]",
 		Short: `Request alliance to send fund to here.
 		Remember to add "--from"`,
 		Args: cobra.ExactArgs(1),
