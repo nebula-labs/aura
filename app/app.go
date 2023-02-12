@@ -382,7 +382,7 @@ func New(
 	scopedICAHostKeeper := app.CapabilityKeeper.ScopeToModule(icahosttypes.SubModuleName)
 	// this line is used by starport scaffolding # stargate/app/scopedKeeper
 	scopedWasmKeeper := app.CapabilityKeeper.ScopeToModule(wasm.ModuleName)
-	scopedAllianceKeeper := app.CapabilityKeeper.ScopeToModule(auramoduletypes.ModuleName)
+	scopedAllianceKeeper := app.CapabilityKeeper.ScopeToModule(alliancetypes.ModuleName)
 	app.CapabilityKeeper.Seal()
 	// add keepers
 	app.AccountKeeper = authkeeper.NewAccountKeeper(
