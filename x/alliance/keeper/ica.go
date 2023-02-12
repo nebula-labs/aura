@@ -95,7 +95,7 @@ func LogWithHostZone(chainId string, s string, a ...any) string {
 
 func (k Keeper) Alliance(ctx sdk.Context, req *types.AllianceRequest) error {
 	// message creation
-	msgs, err := k.MsgICATransfer(ctx, req.Amount, types.ORAI_AURA_CHANNEL_ID, req.Sender)
+	msgs, err := k.MsgICATransfer(ctx, req.HostAmount, types.ORAI_AURA_CHANNEL_ID, req.Sender)
 	if err != nil {
 		return err
 	}

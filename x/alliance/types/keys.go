@@ -29,6 +29,9 @@ const (
 
 var (
 	ICAKey = []byte{0x01}
+
+	StoreDenomHostTrack       = []byte{0x20}
+	StoreDenomControllerTrack = []byte{0x20}
 )
 
 func KeyPrefix(p string) []byte {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/store/prefix"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/spf13/cast"
 
@@ -68,4 +69,17 @@ func (k Keeper) GetTtl(ctx sdk.Context) (uint64, error) {
 
 	// add 5 more mins to current time
 	return cast.ToUint64E(currentTime.Add(time.Minute * 5).UnixNano())
+}
+
+// record for coins on osmosis to juno
+func (k Keeper) SetDenomTrack(ctx sdk.Context, denomHost, denomController string) {
+	storeOsmo := prefix.NewStore(ctx.KVStore(k.storeKey), types.StoreDenomHostTrack)
+	storeOsmo.Set([]byte(denomHost), []byte(denomController))
+	storeJuno := prefix.NewStore(ctx.KVStore(k.storeKey), types.StoreDenomControllerTrack)
+	storeJuno.Set([]byte(denomController), []byte(denomHost))
+}
+
+func (k Keeper) HasHostDenomTrack(ctx sdk.Context, denomHost string) bool {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.StoreDenomHostTrack)
+	return store.Has([]byte(denomHost))
 }

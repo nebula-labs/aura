@@ -14,8 +14,8 @@ const (
 
 func NewMsgAllianceRequest(sender string, amount sdk.Coin) *AllianceRequest {
 	return &AllianceRequest{
-		Sender: sender,
-		Amount: amount,
+		Sender:     sender,
+		HostAmount: amount,
 	}
 }
 

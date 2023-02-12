@@ -32,7 +32,7 @@ func (server msgServer) Alliance(ctx context.Context, req *types.AllianceRequest
 		sdk.NewEvent(
 			types.EventAlliance,
 			sdk.NewAttribute(sdk.AttributeKeySender, req.Sender),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, req.Amount.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, req.HostAmount.String()),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,

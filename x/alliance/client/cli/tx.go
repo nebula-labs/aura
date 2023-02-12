@@ -47,8 +47,8 @@ func NewSendTxCmd() *cobra.Command {
 			}
 
 			msg := &types.AllianceRequest{
-				Sender: clientCtx.GetFromAddress().String(),
-				Amount: coin,
+				Sender:     clientCtx.GetFromAddress().String(),
+				HostAmount: coin,
 			}
 			if err := msg.ValidateBasic(); err != nil {
 				return err

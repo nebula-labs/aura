@@ -12,8 +12,9 @@ service Msg { rpc Alliance(AllianceRequest) returns (AllianceResponse); }
 // AllianceRequest is the request type for the Msg/Alliance RPC method.
 message AllianceRequest {
   string sender = 1;
-  cosmos.base.v1beta1.Coin amount = 2 [
-    (gogoproto.nullable) = false
+  cosmos.base.v1beta1.Coin host_amount = 2 [
+    (gogoproto.nullable) = false,
+    (gogoproto.moretags) = "yaml:\"host_amount\""
   ];
 }
 
