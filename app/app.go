@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/aura-nw/aura/app/utils"
-	"github.com/aura-nw/aura/x/aura"
 	custombank "github.com/aura-nw/aura/x/bank"
 	custombankkeeper "github.com/aura-nw/aura/x/bank/keeper"
 	customfeegrantmodule "github.com/aura-nw/aura/x/feegrant/module"
@@ -107,6 +106,9 @@ import (
 
 	"github.com/aura-nw/aura/docs"
 
+	alliance "github.com/aura-nw/aura/x/alliance"
+	alliancekeeper "github.com/aura-nw/aura/x/alliance/keeper"
+	alliancetypes "github.com/aura-nw/aura/x/alliance/types"
 	auramodule "github.com/aura-nw/aura/x/aura"
 	auramodulekeeper "github.com/aura-nw/aura/x/aura/keeper"
 	auramoduletypes "github.com/aura-nw/aura/x/aura/types"
@@ -224,6 +226,7 @@ var (
 		transfer.AppModuleBasic{},
 		customvesting.AppModuleBasic{},
 		auramodule.AppModuleBasic{},
+		alliance.AppModuleBasic{},
 		wasm.AppModuleBasic{},
 		// this line is used by starport scaffolding # stargate/app/moduleBasic
 	)
@@ -303,9 +306,10 @@ type App struct {
 	ScopedWasmKeeper          capabilitykeeper.ScopedKeeper
 	ScopedICAControllerKeeper capabilitykeeper.ScopedKeeper
 	ScopedICAHostKeeper       capabilitykeeper.ScopedKeeper
-	ScopedAuraKeeper          capabilitykeeper.ScopedKeeper
+	ScopedAllianceKeeper      capabilitykeeper.ScopedKeeper
 
-	AuraKeeper auramodulekeeper.Keeper
+	AuraKeeper     auramodulekeeper.Keeper
+	AllianceKeeper alliancekeeper.Keeper
 
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
@@ -344,7 +348,7 @@ func New(
 		govtypes.StoreKey, paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey, feegrant.StoreKey,
 		evidencetypes.StoreKey, ibctransfertypes.StoreKey, capabilitytypes.StoreKey,
 		icacontrollertypes.StoreKey, icahosttypes.StoreKey,
-		auramoduletypes.StoreKey,
+		auramoduletypes.StoreKey, alliancetypes.StoreKey,
 		authzkeeper.StoreKey,
 		wasm.StoreKey,
 		// this line is used by starport scaffolding # stargate/app/storeKey
@@ -378,11 +382,20 @@ func New(
 	scopedICAHostKeeper := app.CapabilityKeeper.ScopeToModule(icahosttypes.SubModuleName)
 	// this line is used by starport scaffolding # stargate/app/scopedKeeper
 	scopedWasmKeeper := app.CapabilityKeeper.ScopeToModule(wasm.ModuleName)
+	scopedAllianceKeeper := app.CapabilityKeeper.ScopeToModule(auramoduletypes.ModuleName)
 	app.CapabilityKeeper.Seal()
 	// add keepers
 	app.AccountKeeper = authkeeper.NewAccountKeeper(
 		appCodec, keys[authtypes.StoreKey], app.GetSubspace(authtypes.ModuleName), authtypes.ProtoBaseAccount, maccPerms,
 	)
+
+	app.AuraKeeper = auramodulekeeper.NewKeeper(
+		appCodec,
+		keys[auramoduletypes.StoreKey],
+		app.GetSubspace(auramoduletypes.ModuleName),
+		app.AccountKeeper,
+	)
+	auraModule := auramodule.NewAppModule(appCodec, app.AuraKeeper)
 
 	app.BankKeeper = custombankkeeper.NewBaseKeeper(
 		appCodec, keys[banktypes.StoreKey], app.AccountKeeper, app.GetSubspace(banktypes.ModuleName), app.ModuleAccountAddrs(), app.AuraKeeper,
@@ -470,8 +483,14 @@ func New(
 	)
 	icaModule := ica.NewAppModule(&app.ICAControllerKeeper, &app.ICAHostKeeper)
 
+	app.AllianceKeeper = alliancekeeper.NewKeeper(
+		appCodec, keys[alliancetypes.StoreKey], app.GetSubspace(alliancetypes.ModuleName),
+		scopedAllianceKeeper, app.ICAControllerKeeper, app.TransferKeeper,
+		*app.IBCKeeper, app.AccountKeeper,
+	)
+
 	var icamiddlewareStack ibcporttypes.IBCModule
-	icamiddlewareStack = aura.NewIBCModule(app.AuraKeeper)
+	icamiddlewareStack = alliance.NewIBCModule(app.AllianceKeeper)
 	icamiddlewareStack = icacontroller.NewIBCModule(app.ICAControllerKeeper, icamiddlewareStack)
 	icaHostIBCModule := icahost.NewIBCModule(app.ICAHostKeeper)
 
@@ -481,23 +500,7 @@ func New(
 		AddRoute(ibctransfertypes.ModuleName, transferIBCModule).
 		AddRoute(icahosttypes.SubModuleName, icaHostIBCModule).
 		AddRoute(icacontrollertypes.SubModuleName, icamiddlewareStack).
-		AddRoute(auramoduletypes.ModuleName, icamiddlewareStack)
-
-	scopedAuraKeeper := app.CapabilityKeeper.ScopeToModule(auramoduletypes.ModuleName)
-	app.ScopedAuraKeeper = scopedAuraKeeper
-	app.AuraKeeper = auramodulekeeper.NewKeeper(
-		appCodec,
-		keys[auramoduletypes.StoreKey],
-		keys[auramoduletypes.MemStoreKey],
-		app.GetSubspace(auramoduletypes.ModuleName),
-		app.ScopedAuraKeeper,
-		app.ICAControllerKeeper,
-		app.TransferKeeper,
-		*app.IBCKeeper,
-		app.AccountKeeper,
-	)
-
-	auraModule := auramodule.NewAppModule(appCodec, app.AuraKeeper)
+		AddRoute(alliancetypes.ModuleName, icamiddlewareStack)
 
 	// ------ CosmWasm setup ------
 	wasmDir := filepath.Join(homePath, "wasm")
@@ -578,6 +581,7 @@ func New(
 		params.NewAppModule(app.ParamsKeeper),
 		transferModule,
 		auraModule,
+		alliance.NewAppModule(appCodec, app.AllianceKeeper),
 		wasm.NewAppModule(appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper),
 		// this line is used by starport scaffolding # stargate/app/appModule
 	)
@@ -608,6 +612,7 @@ func New(
 		ibctransfertypes.ModuleName,
 		icatypes.ModuleName,
 		auramoduletypes.ModuleName,
+		alliancetypes.ModuleName,
 		wasm.ModuleName,
 	)
 
@@ -633,6 +638,7 @@ func New(
 		ibctransfertypes.ModuleName,
 		icatypes.ModuleName,
 		auramoduletypes.ModuleName,
+		alliancetypes.ModuleName,
 		wasm.ModuleName,
 	)
 
@@ -657,6 +663,7 @@ func New(
 		ibctransfertypes.ModuleName,
 		icatypes.ModuleName,
 		auramoduletypes.ModuleName,
+		alliancetypes.ModuleName,
 		feegrant.ModuleName,
 		authz.ModuleName,
 		paramstypes.ModuleName,
@@ -684,6 +691,7 @@ func New(
 		stakingtypes.ModuleName,
 		ibctransfertypes.ModuleName,
 		icatypes.ModuleName,
+		alliancetypes.ModuleName,
 		paramstypes.ModuleName,
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
@@ -755,7 +763,8 @@ func New(
 	app.ScopedICAControllerKeeper = scopedICAControllerKeeper
 	app.ScopedICAHostKeeper = scopedICAHostKeeper
 	app.ScopedWasmKeeper = scopedWasmKeeper
-	// this line is used by starport scaffolding # stargate/app/beforeInitReturn
+	app.ScopedAllianceKeeper = scopedAllianceKeeper
+
 	return app
 }
 
@@ -902,6 +911,7 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(ibctransfertypes.ModuleName)
 	paramsKeeper.Subspace(ibchost.ModuleName)
 	paramsKeeper.Subspace(auramoduletypes.ModuleName)
+	paramsKeeper.Subspace(alliancetypes.ModuleName)
 	paramsKeeper.Subspace(wasm.ModuleName)
 	paramsKeeper.Subspace(icacontrollertypes.SubModuleName)
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)

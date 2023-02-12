@@ -1,0 +1,7 @@
+syntax = "proto3";
+package auranw.alliance;
+
+option go_package = "github.com/aura-nw/aura/x/alliance/types";
+
+// Query defines the gRPC querier service.
+service Query {}

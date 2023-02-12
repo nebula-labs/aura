@@ -1,10 +1,10 @@
-package aura
+package alliance
 
 import (
 	"fmt"
 
-	"github.com/aura-nw/aura/x/aura/keeper"
-	"github.com/aura-nw/aura/x/aura/types"
+	"github.com/aura-nw/aura/x/alliance/keeper"
+	"github.com/aura-nw/aura/x/alliance/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"

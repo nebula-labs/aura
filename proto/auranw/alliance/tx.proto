@@ -1,0 +1,21 @@
+syntax = "proto3";
+package auranw.alliance;
+
+import "cosmos/base/v1beta1/coin.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/aura-nw/aura/x/alliance/types";
+
+// Msg defines the Msg service.
+service Msg { rpc Alliance(AllianceRequest) returns (AllianceResponse); }
+
+// AllianceRequest is the request type for the Msg/Alliance RPC method.
+message AllianceRequest {
+  string sender = 1;
+  cosmos.base.v1beta1.Coin amount = 2 [
+    (gogoproto.nullable) = false
+  ];
+}
+
+// AllianceResponse is the response type for the Msg/Alliance RPC method.
+message AllianceResponse {}

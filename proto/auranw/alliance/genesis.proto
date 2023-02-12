@@ -1,0 +1,10 @@
+syntax = "proto3";
+package auranw.alliance;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/aura-nw/aura/x/alliance/types";
+
+// GenesisState defines the aura module's genesis state.
+message GenesisState {
+}

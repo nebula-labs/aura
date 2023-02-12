@@ -2,10 +2,8 @@ package keeper
 
 import (
 	"fmt"
-	"time"
 
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	"github.com/spf13/cast"
 
 	"github.com/tendermint/tendermint/libs/log"
 
@@ -13,35 +11,21 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	accountkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
-	capabilitykeeper "github.com/cosmos/cosmos-sdk/x/capability/keeper"
-	icacontrollerkeeper "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/controller/keeper"
-	ibctransferkeeper "github.com/cosmos/ibc-go/v3/modules/apps/transfer/keeper"
-	ibckeeper "github.com/cosmos/ibc-go/v3/modules/core/keeper"
 )
 
 type (
 	Keeper struct {
-		cdc                 codec.BinaryCodec
-		storeKey            sdk.StoreKey
-		memKey              sdk.StoreKey
-		paramSpace          paramtypes.Subspace
-		scopedKeeper        capabilitykeeper.ScopedKeeper
-		IbcKeeper           ibckeeper.Keeper
-		IcaControllerKeeper icacontrollerkeeper.Keeper
-		transferKeeper      ibctransferkeeper.Keeper
-		accountKeeper       accountkeeper.AccountKeeper
+		cdc           codec.BinaryCodec
+		storeKey      sdk.StoreKey
+		paramSpace    paramtypes.Subspace
+		accountKeeper accountkeeper.AccountKeeper
 	}
 )
 
 func NewKeeper(
 	cdc codec.BinaryCodec,
-	storeKey,
-	memKey sdk.StoreKey,
+	storeKey sdk.StoreKey,
 	paramSpace paramtypes.Subspace,
-	scopedKeeper capabilitykeeper.ScopedKeeper,
-	icaControllerKeeper icacontrollerkeeper.Keeper,
-	transferKeeper ibctransferkeeper.Keeper,
-	ibcKeeper ibckeeper.Keeper,
 	accountKeeper accountkeeper.AccountKeeper,
 ) Keeper {
 	// set KeyTable if it has not already been set
@@ -49,15 +33,10 @@ func NewKeeper(
 		paramSpace = paramSpace.WithKeyTable(types.ParamKeyTable())
 	}
 	return Keeper{
-		cdc:                 cdc,
-		storeKey:            storeKey,
-		memKey:              memKey,
-		paramSpace:          paramSpace,
-		scopedKeeper:        scopedKeeper,
-		IcaControllerKeeper: icaControllerKeeper,
-		IbcKeeper:           ibcKeeper,
-		transferKeeper:      transferKeeper,
-		accountKeeper:       accountKeeper,
+		cdc:           cdc,
+		storeKey:      storeKey,
+		paramSpace:    paramSpace,
+		accountKeeper: accountKeeper,
 	}
 }
 
@@ -95,12 +74,4 @@ func (k Keeper) GetExcludeCirculatingAddr(ctx sdk.Context) []sdk.AccAddress {
 	}
 
 	return excludeAddr
-}
-
-// get TTL for ICQ message
-func (k Keeper) GetTtl(ctx sdk.Context) (uint64, error) {
-	currentTime := ctx.BlockTime()
-
-	// add 5 more mins to current time
-	return cast.ToUint64E(currentTime.Add(time.Minute * 5).UnixNano())
 }

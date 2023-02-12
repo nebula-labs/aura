@@ -1,4 +1,4 @@
-package aura
+package alliance
 
 import (
 	"encoding/json"
@@ -12,9 +12,9 @@ import (
 
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/aura-nw/aura/x/aura/client/cli"
-	"github.com/aura-nw/aura/x/aura/keeper"
-	"github.com/aura-nw/aura/x/aura/types"
+	"github.com/aura-nw/aura/x/alliance/client/cli"
+	"github.com/aura-nw/aura/x/alliance/keeper"
+	"github.com/aura-nw/aura/x/alliance/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"

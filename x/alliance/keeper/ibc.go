@@ -3,7 +3,7 @@ package keeper
 import (
 	"fmt"
 
-	"github.com/aura-nw/aura/x/aura/types"
+	"github.com/aura-nw/aura/x/alliance/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	ibctmtypes "github.com/cosmos/ibc-go/v3/modules/light-clients/07-tendermint/types"
@@ -51,11 +51,11 @@ func (k Keeper) GetChainID(ctx sdk.Context, connectionID string) (string, error)
 // fee address management
 func (k Keeper) SetICAAddress(ctx sdk.Context, address string) {
 	store := ctx.KVStore(k.storeKey)
-	store.Set(types.FeeICAKey, []byte(address))
+	store.Set(types.ICAKey, []byte(address))
 }
 
 func (k Keeper) GetICAAddress(ctx sdk.Context) string {
 	store := ctx.KVStore(k.storeKey)
-	b := store.Get(types.FeeICAKey)
+	b := store.Get(types.ICAKey)
 	return string(b)
 }

@@ -2,7 +2,7 @@ package types
 
 const (
 	// ModuleName defines the module name
-	ModuleName = "aura"
+	ModuleName = "alliance"
 
 	// StoreKey defines the primary module store key
 	StoreKey = ModuleName
@@ -14,7 +14,21 @@ const (
 	QuerierRoute = ModuleName
 
 	// MemStoreKey defines the in-memory store key
-	MemStoreKey = "mem_aura"
+	MemStoreKey = "mem_alliance"
+)
+
+// IBC events
+const (
+	AttributeKeyAck = "acknowledgement"
+)
+
+// Events
+const (
+	EventAlliance = "alliance_event"
+)
+
+var (
+	ICAKey = []byte{0x01}
 )
 
 func KeyPrefix(p string) []byte {
